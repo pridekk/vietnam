@@ -12,8 +12,8 @@ services:
     image: pridekk/server:0.1
     volumes:
     - /home/ubuntu/cluster-haproxy/server:/usr/src/app
-    entrypoint: ["tail","-f", "/dev/null"]
-    # entrypoint: ["npm", "start"]
+    # entrypoint: ["tail","-f", "/dev/null"]
+    entrypoint: ["npm", "start"]
     environment:
       - NAME=John
       - REDIS_PASSWORD=vietnam
@@ -38,7 +38,7 @@ services:
     working_dir: /usr/src/app
     volumes:
     - /home/ubuntu/cluster-haproxy/publisher:/usr/src/app
-    entrypoint: ["tail","-f", "/dev/null"]
+    entrypoint: ["npm", "start"]
     environment:
       - REDIS_PASSWORD=vietnam
     ports:
