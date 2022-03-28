@@ -1,0 +1,15 @@
+{
+  "name": "publisher",
+  "version": "1.0.0",
+  "description": "redis data publisher sample",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "pridekk",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3",
+    "ioredis": "^5.0.1"
+  }
+}

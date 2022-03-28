@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+  haproxy:
+    image: pridekk/haproxy:0.1
+    volumes:
+    - /home/ubuntu/cluster-haproxy/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - "80:80"
+      - "8888:8888"
+
+  server-john:
+    image: pridekk/server:0.1
+    volumes:
+    - /home/ubuntu/cluster-haproxy/server:/usr/src/app
+    entrypoint: ["tail","-f", "/dev/null"]
+    # entrypoint: ["npm", "start"]
+    environment:
+      - NAME=John
+      - REDIS_PASSWORD=vietnam
+
+  server-paul:
+    image: pridekk/server:0.1
+    volumes:
+    - /home/ubuntu/cluster-haproxy/server:/usr/src/app
+    # entrypoint: ["tail","-f", "/dev/null"]
+    entrypoint: ["npm", "start"]
+    environment:
+      - NAME=Paul
+      - REDIS_PASSWORD=vietnam
+  
+  redis:
+    image: bitnami/redis:6.2.6
+    environment:
+      - REDIS_PASSWORD=vietnam
+
+  publisher:
+    image: node:14-alpine
+    working_dir: /usr/src/app
+    volumes:
+    - /home/ubuntu/cluster-haproxy/publisher:/usr/src/app
+    entrypoint: ["tail","-f", "/dev/null"]
+    environment:
+      - REDIS_PASSWORD=vietnam
+    ports:
+      - "3000:3000"
+
+networks:
+  default:
