@@ -1,6 +1,6 @@
 ## ubuntu 초기 설정
 
-``` console
+``` bash
 $ sudo apt-get update
 $ sudo apt-get install \
     ca-certificates \
@@ -18,24 +18,28 @@ $ sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 $ sudo groupadd docker
 
 $ sudo usermod -aG docker $USER
+$ sudo systemctl enable docker.service
+
+$ sudo systemctl enable containerd.service
+
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+$ sudo chmod +x /usr/local/bin/docker-compose
 
 ```
 
-## docker swarm 설정 
-### 최초 1대에서 init, 나머지 서버는 manager, worker 로 join (최소 3대는 manager 여야 이중화 구성 가능)
-### docker group 활성화를 위해 재접속 필요
+### 서비스 구동 (재접속 필요) 
 
-```console 
-$ newgrp docker
-$ docker swarm init
+``` bash 
+$ docker-compose up -d 
+```
+### 전체 서비스 재시작 
 
-Swarm initialized: current node (tst37c3e7v01f5u0i46hfobxp) is now a manager.
-
-To add a worker to this swarm, run the following command:
-
-    docker swarm join --token SWMTKN-1-320ghuc2ddfk0abnbrkz9e5273mbtbhfo1186mg1wimq5e4bj5-7tu97d90wcaor7bjg2mzvlsvp 172.31.16.100:2377
-
-To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+``` bash 
+$ docker-compose restart 
 ```
 
-### docker image build 및 push
+### 로그 확인 
+``` bash 
+$ docker-compose logs -f 
+```
