@@ -6,6 +6,17 @@
 * publisher: 채널에 publish 하는 예제 
 
 ---
+
+## 예제 웹 접속:
+
+<a href="http://34.236.170.57">여기로 접속(방화벽 작업 진행해야함)</a>
+
+|command | 설명 | 예제 |
+|---|---|---|
+|join| 채널 가입| join data|
+|left| 채널 탈퇴| left data|
+
+
 ## ubuntu 초기 설정
 
 ``` bash
