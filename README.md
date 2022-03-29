@@ -1,3 +1,11 @@
+## Haproxy - Socket.io - Redis Pubsub 처리 Example
+---
+### 폴더구조
+* haproxy: websocket, api proxy, 부하분산 설정
+* server: 채팅예제를 기반으로한 웹 pubsub 서버 
+* publisher: 채널에 publish 하는 예제 
+
+---
 ## ubuntu 초기 설정
 
 ``` bash
@@ -42,4 +50,17 @@ $ docker-compose restart
 ### 로그 확인 
 ``` bash 
 $ docker-compose logs -f 
+```
+
+### Pubsub Test 
+```bash
+curl --location --request POST 'http://34.236.170.57/publish' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: serverid=paul' \
+--data-raw '{
+    "channel": "data",
+    "data":  {
+        "message": "hi"
+    }
+}'
 ```

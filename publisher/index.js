@@ -1,5 +1,6 @@
 // Setup basic express server
 const express = require('express');
+const bodyParser = require('body-parser')
 const app = express();
 const server = require('http').createServer(app);
 const redis = require('ioredis');
@@ -22,6 +23,8 @@ server.listen(port, function () {
   console.log('Hello, I\'m %s, how can I help?', serverName);
 });
 
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json());
 // Health check
 app.head('/health', function (req, res) {
   res.sendStatus(200);
@@ -30,6 +33,8 @@ app.head('/health', function (req, res) {
 app.post('/publish', (req,res) => {
 
     console.log(req.body)
-    pubClient.publish('data', JSON.stringify({name: "name", data: 1}))
+    const data = req.body 
+
+    pubClient.publish(data.channel, JSON.stringify(data.data))
     res.sendStatus(200)
 })
