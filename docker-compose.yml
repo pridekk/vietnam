@@ -3,7 +3,7 @@ services:
   haproxy:
     image: pridekk/haproxy:0.1
     volumes:
-    - /home/ubuntu/cluster-haproxy/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    - ./load_balancer/load_balancer.cfg:/usr/local/etc/load_balancer/load_balancer.cfg
     ports:
       - "80:80"
       - "8888:8888"
@@ -11,7 +11,7 @@ services:
   server-john:
     image: pridekk/server:0.1
     volumes:
-    - /home/ubuntu/cluster-haproxy/server:/usr/src/app
+    - ./market_feed/server:/usr/init/app
     # entrypoint: ["tail","-f", "/dev/null"]
     entrypoint: ["npm", "start"]
     environment:
@@ -21,7 +21,7 @@ services:
   server-paul:
     image: pridekk/server:0.1
     volumes:
-    - /home/ubuntu/cluster-haproxy/server:/usr/src/app
+    - ./market_feed/server:/usr/init/app
     # entrypoint: ["tail","-f", "/dev/null"]
     entrypoint: ["npm", "start"]
     environment:
@@ -35,14 +35,45 @@ services:
 
   publisher:
     image: node:14-alpine
-    working_dir: /usr/src/app
+    working_dir: /usr/init/app
     volumes:
-    - /home/ubuntu/cluster-haproxy/publisher:/usr/src/app
+    - ./market_feed/cluster-load_balancer/publisher:/usr/init/app
     entrypoint: ["npm", "start"]
     environment:
       - REDIS_PASSWORD=vietnam
     ports:
       - "3000:3000"
 
+  mongo:
+    image: mongo:4.4.13
+    restart: always
+    volumes:
+      - ./investment/mongo/db:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+
+  investment:
+    image: node:14-alpine
+    working_dir: /usr/init/app
+    volumes:
+      - ./investment/server:/usr/init/app
+    entrypoint: [ "npm", "start" ]
+    environment:
+      MONGODB_URL: mongodb://root:example@mongo:27017/
+    ports:
+      - "8082:3000"
 networks:
   default:

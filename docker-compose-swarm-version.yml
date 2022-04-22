@@ -3,20 +3,20 @@ services:
   haproxy1:
     image: pridekk/haproxy:0.1
     volumes:
-    - /mnt/efs/cluster-haproxy/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    - /mnt/efs/cluster-load_balancer/load_balancer/load_balancer.cfg:/usr/local/etc/load_balancer/load_balancer.cfg
     ports:
       - "3000:80"
   haproxy2:
     image: pridekk/haproxy:0.1
     volumes:
-    - /mnt/efs/cluster-haproxy/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    - /mnt/efs/cluster-load_balancer/load_balancer/load_balancer.cfg:/usr/local/etc/load_balancer/load_balancer.cfg
     ports:
       - "3001:80"
 
   server-john:
     image: pridekk/server:0.1
     volumes:
-    - /mnt/efs/cluster-haproxy/server:/usr/src/app
+    - /mnt/efs/cluster-load_balancer/server:/usr/init/app
     entrypoint: ["npm", "start"]
     environment:
       - NAME=John
@@ -26,7 +26,7 @@ services:
   server-paul:
     image: pridekk/server:0.1
     volumes:
-    - /mnt/efs/cluster-haproxy/server:/usr/src/app
+    - /mnt/efs/cluster-load_balancer/server:/usr/init/app
     entrypoint: ["npm", "start"]
     environment:
       - NAME=Paul

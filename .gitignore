@@ -1,0 +1,6 @@
+/node_modules/
+/investment/node_modules/
+/market_feed/server/node_modules/
+/market_feed/publisher/node_modules/
+/investment/server/node_modules/
+node_modules/
