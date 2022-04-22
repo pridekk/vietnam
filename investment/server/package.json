@@ -1,0 +1,17 @@
+{
+  "name": "investment-api-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "run": "node index.js",
+    "init": "node --trace-warnings init/db_init.mjs  ",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "pridekk",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^4.5.0"
+  },
+  "type": "module"
+}
