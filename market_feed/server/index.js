@@ -9,32 +9,6 @@ const port = process.env.PORT || 3000;
 const serverName = process.env.NAME || 'Unknown';
 const redis_password = process.env.REDIS_PASSWORD
 
-// 가입 가능한 채널 및 채널에 가입한 사용자 수
-// 0 이면 redis의 채널에 가입을 취소함
-// 1 이상이면 redis의 채널에 가입하고 데이터를 중계
-const channel_status = {
-  "channel1": {
-      count: 0,
-      users: new Set()
-  },
-  "channel2": {
-    count: 0,
-    users: new Set()
-  },
-  "channel3": {
-    count: 0,
-    users: new Set()
-  }
-}
-
-const channels = Object.keys(channel_status)
-const commands = ["join", "left"]
-let help = ""
-
-commands.forEach(item => {
-  help += `${item} [${channels.join("|")}]\n`
-})
-
 const pubClient = new redis(
   {
     port: 6379, 
@@ -46,6 +20,7 @@ const pubClient = new redis(
 );
 
 const subClient = pubClient.duplicate();
+
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
@@ -65,6 +40,7 @@ app.head('/health', function (req, res) {
 let numUsers = 0;
 io.on('connection', function (socket) {
   socket.emit('my-name-is', serverName);
+  socket.emit('my-name-is', serverName);
 
   let addedUser = false;
 
@@ -74,50 +50,22 @@ io.on('connection', function (socket) {
 
     let commands = data.split(" ")
     
-    if(commands[0] === "join" && channel_status[commands[1]] != undefined && !channel_status[commands[1]].users.has(socket.id) ){
-      
-      if(channel_status[commands[1]].count === 0){
-        subClient.subscribe(commands[1], (err) => {
-          if(err){
-            console.log(`Error: ${err}`)
-          }
-        })
-      }
-      channel_status[commands[1]].count ++
-      channel_status[commands[1]].users.add(socket.id)
-
-
+    if(commands[0] === "join"){
       socket.join(commands[1])
-      
       socket.emit('new message', {
         username: "from server",
         message: `Joined ${commands[1]}`
-      })
-      console.log(`${socket.id} is joined ${commands[1]}`)
-    
-    } else if(commands[0] === "left" && channel_status[commands[1]] != undefined && channel_status[commands[1]].users.has(socket.id)){
-    
-      channel_status[commands[1]].count--
-      channel_status[commands[1]].users.delete(socket.id)
-      if(channel_status[commands[1]].count === 0){
-        subClient.unsubscribe(commands[1], (err) => {
-          if(err){
-            console.log(`Error: ${err}`)
-          }
-        })
-      }
+      });
+    } else if(commands[0] === "left"){
       socket.leave(commands[1])
-      
       socket.emit('new message', {
         username: "from server",
         message: `Left ${commands[1]}`
-      })
-      console.log(`${socket.id} is left ${commands[1]}`)
-
+      });
     } else {
       socket.emit('new message', {
         username: "from server",
-        message: `Unsupported Commands "${data}"\n Support Commands: \n ${help}`
+        message: "Unsupported Commands"
       });
     }
   })
@@ -139,29 +87,42 @@ io.on('connection', function (socket) {
   });
   });
 
+  // when the client emits 'typing', we broadcast it to others
+  socket.on('typing', function () {
+  socket.broadcast.emit('typing', {
+    username: socket.username
+  });
+  });
+
+  // when the client emits 'stop typing', we broadcast it to others
+  socket.on('stop typing', function () {
+  socket.broadcast.emit('stop typing', {
+    username: socket.username
+  });
+  });
 
   // when the user disconnects.. perform this
   socket.on('disconnect', function () {
+  if (addedUser) {
+    --numUsers;
 
-    channels.forEach(channel => {
-      let userJoined = channel_status[channel].users.delete(socket.id)
-      if(userJoined){
-        console.log(`${socket.username} left ${channel}`)
-        channel_status[channel].count--
-      }
+    // echo globally that this client has left
+    socket.broadcast.emit('user left', {
+      username: socket.username,
+      numUsers: numUsers
     });
-    if (addedUser) {
-      --numUsers;
-      // echo globally that this client has left
-      socket.broadcast.emit('user left', {
-        username: socket.username,
-        numUsers: numUsers
-      });
-    }
+  }
   });
+
+  
 });
 
-
+// Redis 구독 * 사용자에 따라 동적으로 구독하는 로직 추가 필요 
+subClient.subscribe("data", (err) => {
+  if(err){
+    console.log(`Error: ${err}`)
+  }
+})
 
 // Redis에서 구독된 데이터 수신 처리 
 subClient.on("message", (channel, message) => {
